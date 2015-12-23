@@ -188,7 +188,7 @@ class PollBotChat extends TelegramBotChat {
           $title = str_replace("\n", ' ', $title);
           $title = mb_substr($title, 0, 1024, 'UTF-8');
           if (!strlen($title)) {
-            $this->apiSendMessage("Sorry, I only support text and emoji for questions and answers.");
+            $this->apiSendMessage("ببخشید اما انها متن و ایموجی پشتیبانی میشود");
             return;
           }
           $newpoll['title'] = $title;
@@ -242,7 +242,7 @@ class PollBotChat extends TelegramBotChat {
     );
     $this->dbSavePollCreating($author_id, $newpoll);
 
-    $text = "Let's create a new poll. First, send me the question.";
+    $text = "بزن بریم نظرسنجی بسازیم.سوالتو بفرست";
     if ($this->isGroup) {
       $params = array(
         'reply_markup' => array(
@@ -269,9 +269,9 @@ class PollBotChat extends TelegramBotChat {
     $this->dbSavePollCreating($author_id, $newpoll);
 
     if (count($newpoll['options']) > 0) {
-      $text = "Good. Now send me another answer option.\n\nWhen you've added enough options, simply send /done to publish the poll.";
+      $text = "خوب.حالا خواب بعدیو ارسال کن\n\nWهر وقت کافی بود\n/publish\nرو بفرست;
     } else {
-      $text = "Creating a new poll: '{$newpoll['title']}'\n\nPlease send me the first answer option.";
+      $text = "ساخت نظرسنجی جدید: '{$newpoll['title']}'\n\nخوب حالا اولین جواب رو بفرست.";
     }
     if ($this->isGroup) {
       $params = array(
@@ -299,7 +299,7 @@ class PollBotChat extends TelegramBotChat {
       $this->createPoll($author_id, $newpoll);
     } else {
       $this->dbDropPollCreating($author_id);
-      $this->apiSendMessage("Sorry, a poll needs to have a question and at least one answer option to work. Send /newpoll to try again.");
+      $this->apiSendMessage("متاسفیم یه نظرسنجی حداقل یک سوال ویک جواب نیازمند است \newpoll را ارسال کنید");
     }
   }
 
@@ -343,16 +343,16 @@ class PollBotChat extends TelegramBotChat {
     $option = $this->curPoll['options'][$option_id];
     $already_voted = $this->dbCheckOption($voter_id, $option_id);
     if ($already_voted) {
-      $text = "☝️{$name} is still for '{$option}'.";
+      $text = "☝️{$name} هنوز به رای خود راضی است '{$option}'.";
     } else {
       $new_vote = $this->dbSelectOption($voter_id, $option_id);
       if ($new_vote) {
-        $text = "☝️{$name} voted for '{$option}'.";
+        $text = "☝️{$name} رای داد به '{$option}'.";
       } else {
-        $text = "☝️{$name} changed the vote to '{$option}'.";
+        $text = "☝️{$name} تغییر رای داد به '{$option}'.";
       }
     }
-    $text .= "\n/results - show results\n/poll - repeat the question";
+    $text .= "\n/results - نمایش نتیجه\n/poll - تکرار سوال";
 
     $this->apiSendMessage($text, $message_params);
   }
@@ -475,35 +475,35 @@ class PollBotChat extends TelegramBotChat {
 
 
   protected function sendGreeting() {
-    $this->apiSendMessage("To create a new poll, send me a message exactly in this format:\n\n/newpoll\nYour question\nAnswer option 1\nAnswer option 2\n...\nAnswer option x");
+    $this->apiSendMessage("برای ساخت نظرس, دقیق اینرا بفرستید:\n\n/newpoll\سوال\nجواب یک 1\جواب 2\n...\nجواب x");
   }
 
   protected function sendGroupOnly() {
-    $this->apiSendMessage("This command will work in those of your groups that have an active poll. Use /newpoll to create a poll.");
+    $this->apiSendMessage("این در گروه هایی که نظر سنجی داری کار میده");
   }
 
   protected function sendNoPoll() {
-    $this->apiSendMessage("No active polls in this group. Use /newpoll to create a poll first.");
+    $this->apiSendMessage("از /newpoll استفاده کنید");
   }
 
   protected function sendOnePollOnly() {
-    $this->apiSendMessage("Sorry, only one poll at a time is allowed.\n/poll - repeat the question\n/endpoll - close current poll");
+    $this->apiSendMessage("ببخشید تنها یه نظرسنجی مجاز است\n/poll - تکرار سوال\n/endpoll - یستن نظرسنجی");
   }
 
   protected function sendHelp() {
     if ($this->isGroup) {
-      $text = "This bot can create simple polls in groups.";
+      $text = "این ربات نظرسنجی ایجاد میکند";
     } else {
-      $text = "This bot can create simple polls. You can create a poll and share it to a group.";
+      $text = "شما میتوانید با این بات نظرسنجی کنید";
     }
-    $text .= "\n\n/newpoll - create a poll\n/results - see how the poll is going\n/poll - repeat the question\n/endpoll - close poll and show final results";
+    $text .= "\n\n/newpoll - ساخت نظرسنجی\n/results - نمایش نتایج\n/poll - تکرار سوال\n/endpoll - بستن و نشان دادن تایج";
     $this->apiSendMessage($text);
   }
 
   public function sendPoll($resend = false, $message_id = 0) {
     $text = $this->getPollText($this->curPoll);
     if ($this->isGroup) {
-      $text .= "\n\n/results - show results\n/endpoll - close poll";
+      $text .= "\n\n/results - نمایش نتایج\n/endpoll - بستن نظرسنجی";
     }
     $message_params = array(
       'reply_markup' => array(
@@ -520,7 +520,7 @@ class PollBotChat extends TelegramBotChat {
   protected function sendPollCreated($poll) {
     $text = "👍 Poll created.";
     if (!$this->isGroup) {
-      $text .= " Use this link to share it to a group:\n";
+      $text .= " از این لینک برای به اشتراک گذاری انتخاب کنید:\n";
       $text .= $this->getPollLink($poll['id']);
       $text .= "\n\n";
       $text .= $this->getPollText($poll, true);
@@ -553,7 +553,7 @@ class PollBotChat extends TelegramBotChat {
 
     $text = '';
     if ($final) {
-      $text .= "📊 Poll closed, final results:\n\n";
+      $text .= "📊 نظرسنجی بسته شد نتایج نهایی:\n\n";
     }
     $text .= $this->curPoll['title']."\n";
     if (!$total_value) {
@@ -561,12 +561,12 @@ class PollBotChat extends TelegramBotChat {
     } else if ($total_value == 1) {
       $text .= "👥 1 person";
     } else {
-      $text .= "👥 {$total_value} people";
+      $text .= "👥 {$total_value} فرد";
     }
     if ($final) {
-      $text .= " voted in total.";
+      $text .= " جمعا رای دادند.";
     } else {
-      $text .= " voted so far.";
+      $text .= " قبلا رای داد";
     }
     foreach ($results as &$result) {
       $text .= "\n\n{$result['label']} – {$result['value']}\n";
@@ -574,7 +574,7 @@ class PollBotChat extends TelegramBotChat {
       $text .= " {$result['procent']}%";
     }
     if (!$final) {
-      $text .= "\n\n/poll - repeat question\n/endpoll - close poll";
+      $text .= "\n\n/poll - تکرار سوال\n/endpoll - بستن نظرسنجی";
     }
 
     $message_params = array();
